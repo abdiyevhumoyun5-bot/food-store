@@ -16,7 +16,9 @@ var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection");
 
 // Railway DATABASE_URL ni Npgsql formatiga o'girish
-if (connectionString != null && connectionString.StartsWith("postgres://"))
+// postgresql:// yoki postgres:// ikkalasini ham qo'llab-quvvatlash
+if (connectionString != null &&
+    (connectionString.StartsWith("postgresql://") || connectionString.StartsWith("postgres://")))
 {
     var uri = new Uri(connectionString);
     var userInfo = uri.UserInfo.Split(':');
