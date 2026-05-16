@@ -1,0 +1,75 @@
+@model List<Jahongir_diplomIshi.Models.Address>
+@{
+    ViewData["Title"] = "Manzillarim";
+}
+
+<div class="container py-5">
+    <div class="row g-4">
+        <div class="col-md-3">
+            @await Html.PartialAsync("_CabinetSidebar")
+        </div>
+        <div class="col-md-9">
+            <h5 class="fw-bold mb-4">Yetkazib berish manzillarim</h5>
+
+            @if (Model.Any())
+            {
+                <div class="row g-3 mb-4">
+                    @foreach (var a in Model)
+                    {
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm @(a.IsDefault ? "border-success" : "")">
+                                <div class="card-body">
+                                    @if (a.IsDefault)
+                                    {
+                                        <span class="badge bg-success mb-2">Asosiy manzil</span>
+                                    }
+                                    <div class="fw-semibold">@a.City</div>
+                                    <div class="text-muted small">@a.Street @a.Apartment</div>
+                                    <div class="text-muted small">📞 @a.Phone</div>
+                                    <form method="post" action="/Cabinet/DeleteAddress" class="mt-2"
+                                          onsubmit="return confirm('Manzilni o\'chirishni tasdiqlaysizmi?')">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@a.Id" />
+                                        <button class="btn btn-sm btn-outline-danger rounded-pill">
+                                            <i class="bi bi-trash me-1"></i>O'chirish
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+
+            <!-- YANGI MANZIL -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h6 class="fw-semibold mb-3">Yangi manzil qo'shish</h6>
+                    <form asp-action="AddAddress" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <input name="City" class="form-control rounded-pill" placeholder="Shahar *" required />
+                            </div>
+                            <div class="col-md-6">
+                                <input name="Phone" class="form-control rounded-pill" placeholder="Telefon *" required />
+                            </div>
+                            <div class="col-8">
+                                <input name="Street" class="form-control rounded-pill" placeholder="Ko'cha, uy *" required />
+                            </div>
+                            <div class="col-4">
+                                <input name="Apartment" class="form-control rounded-pill" placeholder="Xonadon" />
+                            </div>
+                            <div class="col-12">
+                                <input name="Label" class="form-control rounded-pill" placeholder="Yorliq (Uy, Ish...)" />
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success rounded-pill px-4 mt-3">
+                            <i class="bi bi-plus-lg me-1"></i>Qo'shish
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

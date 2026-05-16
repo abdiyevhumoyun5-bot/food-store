@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — Food Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-success sticky-top shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold fs-4" href="/">
+            🥗 Food Store
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navMain">
+            <form class="d-flex ms-auto me-3" action="/" method="get">
+                <input name="search" class="form-control form-control-sm rounded-pill me-2"
+                       style="min-width:200px" placeholder="Mahsulot qidirish..."
+                       value="@Context.Request.Query["search"]" />
+                <button class="btn btn-light btn-sm rounded-pill" type="submit">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+            <ul class="navbar-nav align-items-center gap-2">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> @User.Identity.Name?.Split('@')[0]
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/Cabinet"><i class="bi bi-person me-2"></i>Kabinetim</a></li>
+                            <li><a class="dropdown-item" href="/Cabinet/Orders"><i class="bi bi-bag me-2"></i>Buyurtmalarim</a></li>
+                            <li><a class="dropdown-item" href="/Cabinet/Favorites"><i class="bi bi-heart me-2"></i>Sevimlilar</a></li>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-warning" href="/admin"><i class="bi bi-shield-check me-2"></i>Admin panel</a></li>
+                            }
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="post" action="/Account/Logout">
+                                    @Html.AntiForgeryToken()
+                                    <button class="dropdown-item text-danger" type="submit">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Chiqish
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item"><a class="nav-link" href="/Account/Login"><i class="bi bi-person"></i> Kirish</a></li>
+                    <li class="nav-item"><a class="btn btn-light btn-sm rounded-pill px-3" href="/Account/Register">Ro'yxatdan o'tish</a></li>
+                }
+                <li class="nav-item">
+                    <a class="btn btn-warning btn-sm rounded-pill px-3 position-relative" href="/Cart">
+                        <i class="bi bi-cart3"></i> Savat
+                        <span id="cartCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.65rem;display:none"></span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- ALERT MESSAGES -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show m-0 rounded-0 text-center" role="alert">
+        <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show m-0 rounded-0 text-center" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>@TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- MAIN CONTENT -->
+<main>
+    @RenderBody()
+</main>
+
+<!-- FOOTER -->
+<footer class="bg-dark text-white pt-5 pb-3 mt-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <h5 class="fw-bold text-success mb-3">🥗 Food Store</h5>
+                <p class="text-white-50 small">
+                    Yangi va sifatli oziq-ovqat mahsulotlari. Sizning sog'lom hayot tarzingiz uchun eng yaxshi tanlov.
+                </p>
+            </div>
+            <div class="col-md-4">
+                <h6 class="fw-semibold mb-3">Havolalar</h6>
+                <ul class="list-unstyled small">
+                    <li><a href="/" class="text-white-50 text-decoration-none">Bosh sahifa</a></li>
+                    <li><a href="/Cart" class="text-white-50 text-decoration-none">Savat</a></li>
+                    <li><a href="/Cabinet" class="text-white-50 text-decoration-none">Kabinetim</a></li>
+                    <li><a href="/Home/Contact" class="text-white-50 text-decoration-none">Aloqa</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h6 class="fw-semibold mb-3">Aloqa</h6>
+                <ul class="list-unstyled small text-white-50">
+                    <li><i class="bi bi-telephone me-2"></i><a href="tel:+998915493307" class="text-white-50 text-decoration-none">+998 91 549 33 07</a></li>
+                    <li><i class="bi bi-envelope me-2"></i><a href="mailto:abdiyevhumoyun5@@gmail.com" class="text-white-50 text-decoration-none">abdiyevhumoyun5@@gmail.com</a></li>
+                    <li><i class="bi bi-geo-alt me-2"></i>Toshkent shahri, O'zbekiston</li>
+                    <li class="mt-2"><i class="bi bi-clock me-2"></i>9:00 – 22:00 (har kuni)</li>
+                </ul>
+            </div>
+        </div>
+        <hr class="border-secondary mt-4" />
+        <div class="text-center text-white-50 small">
+            &copy; 2025 Food Store — Jahongir diplomIshi. Barcha huquqlar himoyalangan.
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+<script>
+    fetch('/Cart/Count').then(r => r.json()).then(d => {
+        if (d.count > 0) {
+            const el = document.getElementById('cartCount');
+            if (el) { el.textContent = d.count; el.style.display = ''; }
+        }
+    });
+</script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

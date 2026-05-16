@@ -1,0 +1,121 @@
+@model List<Jahongir_diplomIshi.Models.Order>
+@{
+    ViewData["Title"] = "Buyurtmalar";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    string[] statuses = { "Pending","Processing","Ready","Delivered","Cancelled" };
+    var labels = new Dictionary<string,string> {
+        {"Pending","Kutilmoqda"},{"Processing","Tayyorlanmoqda"},
+        {"Ready","Tayyor"},{"Delivered","Yetkazildi"},{"Cancelled","Bekor"}
+    };
+    var cls = new Dictionary<string,string> {
+        {"Pending","warning"},{"Processing","primary"},
+        {"Ready","info"},{"Delivered","success"},{"Cancelled","danger"}
+    };
+}
+
+<h5 class="fw-bold mb-4">Buyurtmalar boshqaruvi</h5>
+
+<!-- FILTER -->
+<div class="d-flex flex-wrap gap-2 mb-4">
+    <a href="/admin/orders" class="btn btn-sm @(string.IsNullOrEmpty(ViewBag.CurrentStatus?.ToString()) ? "btn-success" : "btn-outline-secondary") rounded-pill">
+        Barchasi <span class="badge bg-white text-dark ms-1">@Model.Count</span>
+    </a>
+    @foreach (var s in statuses)
+    {
+        int count = Model.Count(o => o.Status.ToString() == s);
+        <a href="/admin/orders?status=@s"
+           class="btn btn-sm @(ViewBag.CurrentStatus?.ToString() == s ? $"btn-{cls[s]}" : "btn-outline-secondary") rounded-pill">
+            @labels[s]
+            @if (count > 0) { <span class="badge bg-white text-dark ms-1">@count</span> }
+        </a>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card border-0 shadow-sm text-center py-5 text-muted">
+        <div style="font-size:4rem">📋</div>
+        <p class="mt-2">Buyurtma topilmadi</p>
+    </div>
+}
+else
+{
+    <div class="d-flex flex-column gap-3">
+        @foreach (var o in Model)
+        {
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
+                        <div>
+                            <div class="fw-bold">#@o.OrderNumber</div>
+                            <div class="text-muted small">
+                                @(o.User?.FullName ?? o.GuestName ?? "Mehmon") —
+                                @(o.User?.Email ?? o.GuestPhone ?? "")
+                            </div>
+                            <div class="text-muted small">
+                                @o.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm") ·
+                                @(o.OrderType == Jahongir_diplomIshi.Models.OrderType.Delivery ? "🚚 Yetkazib berish" : "🏪 Olib ketish")
+                            </div>
+                            @if (o.Address != null)
+                            {
+                                <div class="text-muted small">📍 @o.Address.City, @o.Address.Street — @o.Address.Phone</div>
+                            }
+                        </div>
+
+                        <!-- STATUS & TO'LOV YANGILASH -->
+                        <form method="post" action="/admin/UpdateOrderStatus" class="d-flex flex-wrap gap-2 align-items-center">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@o.Id" />
+
+                            <select name="status" class="form-select form-select-sm rounded-pill" style="width:160px">
+                                @foreach (var s in statuses)
+                                {
+                                    if (o.Status.ToString() == s)
+                                    { <option value="@s" selected>@labels[s]</option> }
+                                    else
+                                    { <option value="@s">@labels[s]</option> }
+                                }
+                            </select>
+
+                            <select name="paymentStatus" class="form-select form-select-sm rounded-pill" style="width:160px">
+                                @if (o.PaymentStatus == Jahongir_diplomIshi.Models.PaymentStatus.Pending)
+                                { <option value="Pending" selected>⏳ To'lov kutilmoqda</option> }
+                                else
+                                { <option value="Pending">⏳ To'lov kutilmoqda</option> }
+                                @if (o.PaymentStatus == Jahongir_diplomIshi.Models.PaymentStatus.Paid)
+                                { <option value="Paid" selected>✅ To'landi</option> }
+                                else
+                                { <option value="Paid">✅ To'landi</option> }
+                                @if (o.PaymentStatus == Jahongir_diplomIshi.Models.PaymentStatus.Refunded)
+                                { <option value="Refunded" selected>🔄 Qaytarildi</option> }
+                                else
+                                { <option value="Refunded">🔄 Qaytarildi</option> }
+                            </select>
+
+                            <button class="btn btn-sm btn-success rounded-pill px-3" type="submit">
+                                <i class="bi bi-check2"></i> Saqlash
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- MAHSULOTLAR -->
+                    <div class="mt-2 small text-muted">
+                        @foreach (var item in o.Items)
+                        {
+                            <span>@item.ProductName ×@item.Quantity</span>
+                            @if (item != o.Items.Last()) { <span class="mx-1">·</span> }
+                        }
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span class="badge bg-@(o.PaymentStatus == Jahongir_diplomIshi.Models.PaymentStatus.Paid ? "success" : "warning") bg-opacity-75">
+                            @(o.PaymentStatus == Jahongir_diplomIshi.Models.PaymentStatus.Paid ? "✅ To'landi" :
+                              o.PaymentStatus == Jahongir_diplomIshi.Models.PaymentStatus.Refunded ? "🔄 Qaytarildi" : "⏳ To'lov kutilmoqda")
+                        </span>
+                        <span class="fw-bold text-success">@o.TotalAmount.ToString("N0") so'm</span>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

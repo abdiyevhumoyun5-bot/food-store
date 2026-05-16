@@ -1,0 +1,81 @@
+@model Jahongir_diplomIshi.Services.CalorieAnalysisResult
+@{
+    ViewData["Title"] = "Kaloriya tahlili";
+}
+
+<div class="container py-5">
+    <div class="row g-4">
+        <div class="col-md-3">
+            @await Html.PartialAsync("_CabinetSidebar")
+        </div>
+        <div class="col-md-9">
+            <h5 class="fw-bold mb-4">🔥 Kaloriya tahlili</h5>
+
+            @if (Model.TotalCalories == 0)
+            {
+                <div class="text-center py-5 text-muted">
+                    <div style="font-size:4rem">📊</div>
+                    <p class="mt-2">Tahlil uchun yetkazilgan buyurtmalar kerak</p>
+                </div>
+            }
+            else
+            {
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm text-center p-4">
+                            <div class="fs-1 fw-bold text-success">@Model.TotalCalories.ToString("N0")</div>
+                            <div class="text-muted">Jami kaloriya (kkal)</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm text-center p-4">
+                            <div class="fs-1 fw-bold text-warning">@Model.AvgDailyCalories.ToString("N0")</div>
+                            <div class="text-muted">O'rtacha kunlik (kkal)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h6 class="fw-semibold mb-3">🤖 Tavsiya</h6>
+                        <p class="mb-0">@Model.Recommendation</p>
+                    </div>
+                </div>
+
+                @if (Model.TopProducts.Any())
+                {
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white">
+                            <h6 class="fw-semibold mb-0">Ko'p buyurtma qilingan mahsulotlar</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="px-4">Mahsulot</th>
+                                        <th class="text-center">Miqdor</th>
+                                        <th class="text-center">Kaloriya (100g)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var p in Model.TopProducts)
+                                    {
+                                        <tr>
+                                            <td class="px-4 fw-semibold">@p.Name</td>
+                                            <td class="text-center">@p.Quantity</td>
+                                            <td class="text-center">
+                                                <span class="badge @(p.CaloriesPer100g > 200 ? "bg-danger" : p.CaloriesPer100g > 100 ? "bg-warning text-dark" : "bg-success")">
+                                                    @p.CaloriesPer100g kkal
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

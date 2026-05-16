@@ -1,0 +1,38 @@
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="p-4 border-bottom text-center">
+            <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-2"
+                 style="width:60px;height:60px;font-size:1.8rem">
+                👤
+            </div>
+            <div class="fw-semibold">@User.Identity?.Name?.Split('@')[0]</div>
+        </div>
+        <ul class="nav flex-column p-2">
+            <li class="nav-item">
+                <a href="/Cabinet" class="nav-link text-dark @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "fw-bold text-success" : "")">
+                    <i class="bi bi-person me-2"></i>Profil
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/Cabinet/Orders" class="nav-link text-dark @(ViewContext.RouteData.Values["action"]?.ToString() == "Orders" ? "fw-bold text-success" : "")">
+                    <i class="bi bi-bag me-2"></i>Buyurtmalarim
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/Cabinet/Favorites" class="nav-link text-dark @(ViewContext.RouteData.Values["action"]?.ToString() == "Favorites" ? "fw-bold text-success" : "")">
+                    <i class="bi bi-heart me-2"></i>Sevimlilar
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/Cabinet/Addresses" class="nav-link text-dark @(ViewContext.RouteData.Values["action"]?.ToString() == "Addresses" ? "fw-bold text-success" : "")">
+                    <i class="bi bi-geo-alt me-2"></i>Manzillarim
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/Cabinet/AIAnalysis" class="nav-link text-dark @(ViewContext.RouteData.Values["action"]?.ToString() == "AIAnalysis" ? "fw-bold text-success" : "")">
+                    <i class="bi bi-activity me-2"></i>Kaloriya tahlili
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>

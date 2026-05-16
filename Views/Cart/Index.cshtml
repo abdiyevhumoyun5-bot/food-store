@@ -1,0 +1,228 @@
+@model Jahongir_diplomIshi.ViewModels.CheckoutViewModel
+@{
+    ViewData["Title"] = "Savat";
+    var cart = ViewBag.Cart as Jahongir_diplomIshi.ViewModels.CartViewModel;
+}
+
+<div class="container py-5">
+    <h1 class="h3 fw-bold mb-4"><i class="bi bi-cart3 me-2 text-success"></i>Savat</h1>
+
+    @if (cart == null || !cart.Items.Any())
+    {
+        <div class="text-center py-5">
+            <div style="font-size:5rem">🛒</div>
+            <h4 class="mt-3 text-muted">Savat bo'sh</h4>
+            <p class="text-muted">Mahsulotlarni savatga qo'shing</p>
+            <a href="/" class="btn btn-success rounded-pill px-4 mt-2">
+                <i class="bi bi-shop me-2"></i>Xarid qilish
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <!-- CART ITEMS -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm" id="cartItemsBlock">
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="px-4 py-3">Mahsulot</th>
+                                    <th class="py-3 text-center">Miqdor</th>
+                                    <th class="py-3 text-end">Narx</th>
+                                    <th class="py-3"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="cartTableBody">
+                                @foreach (var item in cart.Items)
+                                {
+                                    <tr id="row-@item.ProductId">
+                                        <td class="px-4 py-3">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <img src="@(item.Image ?? "/img/no-image.png")" alt="@item.Name"
+                                                     class="rounded" style="width:50px;height:50px;object-fit:cover" />
+                                                <div>
+                                                    <div class="fw-semibold">@item.Name</div>
+                                                    <small class="text-muted">@item.Price.ToString("N0") so'm / @item.Unit</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-3">
+                                            <div class="d-flex align-items-center justify-content-center gap-2">
+                                                <button class="btn btn-sm btn-outline-secondary rounded-circle"
+                                                        onclick="updateCart(@item.ProductId, @(item.Quantity - 1))">-</button>
+                                                <span class="fw-semibold" id="qty-@item.ProductId">@item.Quantity</span>
+                                                <button class="btn btn-sm btn-outline-secondary rounded-circle"
+                                                        onclick="updateCart(@item.ProductId, @(item.Quantity + 1))">+</button>
+                                            </div>
+                                        </td>
+                                        <td class="py-3 text-end fw-bold text-success" id="total-@item.ProductId">
+                                            @((item.Price * item.Quantity).ToString("N0")) so'm
+                                        </td>
+                                        <td class="py-3 text-center">
+                                            <button class="btn btn-sm btn-outline-danger rounded-pill"
+                                                    onclick="removeFromCart(@item.ProductId)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHECKOUT FORM -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4">Buyurtma berish</h5>
+
+                        <form asp-action="Checkout" method="post">
+                            @Html.AntiForgeryToken()
+
+                            <!-- BUYURTMA TURI -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold small">Buyurtma turi</label>
+                                <div class="d-flex gap-2">
+                                    <input type="radio" class="btn-check" name="OrderType" id="delivery" value="delivery" checked>
+                                    <label class="btn btn-outline-success flex-fill text-center" for="delivery">
+                                        🚚 Yetkazib bering
+                                    </label>
+                                    <input type="radio" class="btn-check" name="OrderType" id="pickup" value="pickup">
+                                    <label class="btn btn-outline-primary flex-fill text-center" for="pickup">
+                                        🏪 Tayyorlab qo'ying
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- DELIVERY MANZIL -->
+                            <div id="deliverySection">
+                                @if (User.Identity?.IsAuthenticated == true && Model.SavedAddresses.Any())
+                                {
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-semibold">Saqlangan manzillar</label>
+                                        <select name="SelectedAddressId" class="form-select form-select-sm rounded-pill">
+                                            <option value="">— Yangi manzil kiriting —</option>
+                                            @foreach (var a in Model.SavedAddresses)
+                                            {
+                                                <option value="@a.Id">@a.City, @a.Street @(a.IsDefault ? "(asosiy)" : "")</option>
+                                            }
+                                        </select>
+                                    </div>
+                                }
+                                <div class="row g-2 mb-3" id="newAddressFields">
+                                    <div class="col-12">
+                                        <input name="City" class="form-control form-control-sm rounded-pill" placeholder="Shahar" />
+                                    </div>
+                                    <div class="col-8">
+                                        <input name="Street" class="form-control form-control-sm rounded-pill" placeholder="Ko'cha, uy raqami" />
+                                    </div>
+                                    <div class="col-4">
+                                        <input name="Apartment" class="form-control form-control-sm rounded-pill" placeholder="Xonadon" />
+                                    </div>
+                                    <div class="col-12">
+                                        <input name="DeliveryPhone" class="form-control form-control-sm rounded-pill" placeholder="Telefon" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- GUEST INFO -->
+                            @if (User.Identity?.IsAuthenticated != true)
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold">Sizning ma'lumotlaringiz</label>
+                                    <input name="GuestName" class="form-control form-control-sm rounded-pill mb-2" placeholder="Ismingiz" required />
+                                    <input name="GuestPhone" class="form-control form-control-sm rounded-pill mb-2" placeholder="Telefon raqamingiz" required />
+                                    <input name="GuestEmail" class="form-control form-control-sm rounded-pill" placeholder="Email (ixtiyoriy)" />
+                                </div>
+                            }
+
+                            <!-- TO'LOV -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small">To'lov usuli</label>
+                                <div class="d-flex gap-2">
+                                    <input type="radio" class="btn-check" name="PaymentMethod" id="cash" value="cash" checked>
+                                    <label class="btn btn-outline-secondary flex-fill text-center btn-sm" for="cash">
+                                        💵 Naqd
+                                    </label>
+                                    <input type="radio" class="btn-check" name="PaymentMethod" id="card" value="card">
+                                    <label class="btn btn-outline-primary flex-fill text-center btn-sm" for="card">
+                                        💳 Karta
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- KARTA (demo) -->
+                            <div id="cardSection" class="mb-3" style="display:none">
+                                <input id="cardNum" class="form-control form-control-sm rounded-pill mb-2"
+                                       placeholder="0000 0000 0000 0000" maxlength="19"
+                                       oninput="formatCard(this)" name="CardNumber" />
+                                <div class="d-flex gap-2">
+                                    <input name="CardExpiry" class="form-control form-control-sm rounded-pill" placeholder="MM/YY" maxlength="5" />
+                                    <input name="CardCvc" class="form-control form-control-sm rounded-pill" placeholder="CVC" maxlength="3" type="password" />
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <input name="Notes" class="form-control form-control-sm rounded-pill" placeholder="Izoh (ixtiyoriy)" />
+                            </div>
+
+                            <!-- JAMI -->
+                            <div class="border-top pt-3 mb-3">
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span class="text-muted">Mahsulotlar:</span>
+                                    <span id="subtotalDisplay">@cart.Subtotal.ToString("N0") so'm</span>
+                                </div>
+                                <div class="d-flex justify-content-between small mb-1" id="deliveryFeeRow">
+                                    <span class="text-muted">Yetkazib berish:</span>
+                                    <span>15 000 so'm</span>
+                                </div>
+                                <div class="d-flex justify-content-between fw-bold fs-5 mt-2 text-success">
+                                    <span>Jami:</span>
+                                    <span id="totalDisplay">@cart.Total.ToString("N0") so'm</span>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-success w-100 rounded-pill py-2 fw-semibold" id="submitBtn">
+                                <i class="bi bi-bag-check me-2"></i>Buyurtma berish
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script src="~/js/cart.js"></script>
+<script>
+const SUBTOTAL = @cart?.Subtotal ?? 0;
+const DELIVERY = 15000;
+
+document.querySelectorAll('input[name=OrderType]').forEach(r => {
+    r.addEventListener('change', function() {
+        const isDelivery = this.value === 'delivery';
+        document.getElementById('deliverySection').style.display = isDelivery ? '' : 'none';
+        document.getElementById('deliveryFeeRow').style.display = isDelivery ? '' : 'none';
+        const fee = isDelivery ? DELIVERY : 0;
+        document.getElementById('totalDisplay').textContent =
+            (SUBTOTAL + fee).toLocaleString('uz-UZ') + ' so\'m';
+    });
+});
+
+document.querySelectorAll('input[name=PaymentMethod]').forEach(r => {
+    r.addEventListener('change', function() {
+        document.getElementById('cardSection').style.display = this.value === 'card' ? '' : 'none';
+    });
+});
+
+function formatCard(el) {
+    let v = el.value.replace(/\D/g,'').substring(0,16);
+    el.value = v.replace(/(.{4})/g,'$1 ').trim();
+}
+</script>
+}

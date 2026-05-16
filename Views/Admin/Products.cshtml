@@ -1,0 +1,126 @@
+@model List<Jahongir_diplomIshi.Models.Product>
+@{
+    ViewData["Title"] = "Mahsulotlar";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var categories = ViewBag.Categories as List<Jahongir_diplomIshi.Models.Category> ?? new();
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <h5 class="fw-bold mb-0">Mahsulotlar boshqaruvi</h5>
+    <a href="/admin/ProductForm" class="btn btn-success rounded-pill px-4">
+        <i class="bi bi-plus-lg me-1"></i>Yangi mahsulot
+    </a>
+</div>
+
+<!-- QIDIRUV -->
+<form method="get" action="/admin/products" class="mb-4">
+    <div class="input-group" style="max-width:350px">
+        <input type="text" name="search" class="form-control rounded-start-pill"
+               placeholder="Mahsulot nomi bo'yicha qidirish..."
+               value="@ViewBag.Search" />
+        <button class="btn btn-outline-success rounded-end-pill" type="submit">
+            <i class="bi bi-search"></i>
+        </button>
+    </div>
+</form>
+
+@if (!Model.Any())
+{
+    <div class="card border-0 shadow-sm text-center py-5 text-muted">
+        <div style="font-size:4rem">📦</div>
+        <p class="mt-2">Mahsulot topilmadi</p>
+    </div>
+}
+else
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="px-4 py-3">Nomi</th>
+                        <th>Kategoriya</th>
+                        <th>Narx</th>
+                        <th>Ombor</th>
+                        <th>Mavsum</th>
+                        <th>Holat</th>
+                        <th class="text-end px-4">Amallar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        <tr>
+                            <td class="px-4 py-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="@p.DisplayImage" alt="" class="rounded" style="width:36px;height:36px;object-fit:cover"
+                                         onerror="this.src='/img/no-image.png'" />
+                                    <div>
+                                        <div class="fw-semibold small">@p.Name</div>
+                                        @if (p.IsFeatured)
+                                        {
+                                            <span class="badge bg-warning text-dark" style="font-size:0.65rem">⭐ Top</span>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3 text-muted small">@p.Category?.Name</td>
+                            <td class="py-3 fw-semibold text-success">@p.Price.ToString("N0") so'm</td>
+                            <td class="py-3">
+                                <span class="@(p.Stock < 5 ? "text-danger fw-bold" : "text-muted") small">
+                                    @p.Stock @p.Unit
+                                </span>
+                            </td>
+                            <td class="py-3">
+                                @foreach (var s in (p.Seasons ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    <span class="badge bg-info-subtle text-info me-1" style="font-size:0.65rem">
+                                        @(s.Trim() switch { "Summer" => "☀️", "Winter" => "❄️", "Spring" => "🌸", "Autumn" => "🍂", _ => s })
+                                    </span>
+                                }
+                            </td>
+                            <td class="py-3">
+                                @if (p.IsActive)
+                                {
+                                    <span class="badge bg-success-subtle text-success">Faol</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-subtle text-secondary">Nofaol</span>
+                                }
+                            </td>
+                            <td class="py-3 text-end px-4">
+                                <a href="/admin/ProductForm/@p.Id" class="btn btn-sm btn-outline-primary rounded-pill me-1">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="post" action="/admin/DeleteProduct" class="d-inline"
+                                      onsubmit="return confirm('Mahsulotni o\'chirishni tasdiqlaysizmi?')">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@p.Id" />
+                                    <button class="btn btn-sm btn-outline-danger rounded-pill">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- SAHIFALASH -->
+    @if ((int)(ViewBag.TotalPages ?? 1) > 1)
+    {
+        <nav class="mt-3 d-flex justify-content-center">
+            <ul class="pagination pagination-sm">
+                @for (int i = 1; i <= (int)(ViewBag.TotalPages ?? 1); i++)
+                {
+                    <li class="page-item @(i == (int)(ViewBag.CurrentPage ?? 1) ? "active" : "")">
+                        <a class="page-link" href="?page=@i&search=@ViewBag.Search">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+}

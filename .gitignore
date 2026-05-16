@@ -1,0 +1,14 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.log
+
+## Upload papkasi (rasmlar serverda saqlanadi)
+wwwroot/uploads/*
+!wwwroot/uploads/.gitkeep
+
+## Secrets (parollar)
+appsettings.Production.json

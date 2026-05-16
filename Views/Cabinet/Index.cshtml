@@ -1,0 +1,66 @@
+@model Jahongir_diplomIshi.Models.User
+@{
+    ViewData["Title"] = "Kabinetim";
+}
+
+<div class="container py-5">
+    <div class="row g-4">
+        <!-- SIDEBAR -->
+        <div class="col-md-3">
+            @await Html.PartialAsync("_CabinetSidebar")
+        </div>
+
+        <!-- ASOSIY -->
+        <div class="col-md-9">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4">Profil ma'lumotlari</h5>
+                    <form asp-action="UpdateProfile" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Ism Familiya</label>
+                                <input type="text" name="fullName" class="form-control rounded-pill"
+                                       value="@Model.FullName" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Email</label>
+                                <input type="email" class="form-control rounded-pill" value="@Model.Email" readonly />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Telefon</label>
+                                <input type="text" name="phone" class="form-control rounded-pill"
+                                       value="@Model.Phone" placeholder="+998 90 000 00 00" />
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success rounded-pill px-4 mt-3">
+                            <i class="bi bi-check2 me-1"></i>Saqlash
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- STATISTIKA -->
+            <div class="row g-3">
+                <div class="col-4">
+                    <div class="card border-0 shadow-sm text-center p-3">
+                        <div class="fs-2 fw-bold text-success">@ViewBag.OrderCount</div>
+                        <div class="text-muted small">Buyurtmalar</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card border-0 shadow-sm text-center p-3">
+                        <div class="fs-2 fw-bold text-danger">@ViewBag.FavoriteCount</div>
+                        <div class="text-muted small">Sevimlilar</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card border-0 shadow-sm text-center p-3">
+                        <div class="fs-2 fw-bold text-info">@ViewBag.AddressCount</div>
+                        <div class="text-muted small">Manzillar</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

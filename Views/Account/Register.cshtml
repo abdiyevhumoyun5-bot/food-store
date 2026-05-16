@@ -1,0 +1,62 @@
+@model Jahongir_diplomIshi.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Ro'yxatdan o'tish";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div style="font-size:3rem">📝</div>
+                        <h2 class="h4 fw-bold mt-2">Ro'yxatdan o'tish</h2>
+                    </div>
+
+                    <form asp-action="Register" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="FullName" class="form-label small fw-semibold">Ism Familiya</label>
+                            <input asp-for="FullName" class="form-control rounded-pill" placeholder="Jahongir Abdiyev" />
+                            <span asp-validation-for="FullName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label small fw-semibold">Email</label>
+                            <input asp-for="Email" class="form-control rounded-pill" placeholder="email@example.com" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Phone" class="form-label small fw-semibold">Telefon <span class="text-muted">(ixtiyoriy)</span></label>
+                            <input asp-for="Phone" class="form-control rounded-pill" placeholder="+998 90 000 00 00" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label small fw-semibold">Parol</label>
+                            <input asp-for="Password" type="password" class="form-control rounded-pill" placeholder="Kamida 6 ta belgi" />
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="ConfirmPassword" class="form-label small fw-semibold">Parolni tasdiqlang</label>
+                            <input asp-for="ConfirmPassword" type="password" class="form-control rounded-pill" placeholder="Parolni qayta kiriting" />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 rounded-pill py-2 fw-semibold">
+                            <i class="bi bi-person-plus me-2"></i>Ro'yxatdan o'tish
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-3 small text-muted">
+                        Hisobingiz bormi?
+                        <a href="/Account/Login" class="text-success fw-semibold text-decoration-none">Kirish</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

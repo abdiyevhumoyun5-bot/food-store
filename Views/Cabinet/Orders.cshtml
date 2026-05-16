@@ -1,0 +1,64 @@
+@model List<Jahongir_diplomIshi.Models.Order>
+@{
+    ViewData["Title"] = "Buyurtmalarim";
+}
+
+<div class="container py-5">
+    <div class="row g-4">
+        <div class="col-md-3">
+            @await Html.PartialAsync("_CabinetSidebar")
+        </div>
+        <div class="col-md-9">
+            <h5 class="fw-bold mb-4">Buyurtmalarim</h5>
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <div style="font-size:4rem">📋</div>
+                    <p class="mt-2">Hali buyurtma bermaganmisiz</p>
+                    <a href="/" class="btn btn-success rounded-pill px-4 mt-2">Xarid qilish</a>
+                </div>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-3">
+                    @foreach (var o in Model)
+                    {
+                        var (sc,sl) = o.Status switch {
+                            Jahongir_diplomIshi.Models.OrderStatus.Pending     => ("warning","Kutilmoqda"),
+                            Jahongir_diplomIshi.Models.OrderStatus.Processing  => ("primary","Tayyorlanmoqda"),
+                            Jahongir_diplomIshi.Models.OrderStatus.Ready       => ("info","Tayyor"),
+                            Jahongir_diplomIshi.Models.OrderStatus.Delivered   => ("success","Yetkazildi"),
+                            Jahongir_diplomIshi.Models.OrderStatus.Cancelled   => ("danger","Bekor"),
+                            _ => ("secondary","—")
+                        };
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <span class="fw-bold">#@o.OrderNumber</span>
+                                        <span class="text-muted small ms-2">@o.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                                    </div>
+                                    <span class="badge bg-@sc">@sl</span>
+                                </div>
+                                <div class="text-muted small mb-2">
+                                    @foreach (var item in o.Items)
+                                    {
+                                        <span>@item.ProductName ×@item.Quantity</span>
+                                        @if (item != o.Items.Last()) { <span> · </span> }
+                                    }
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge @(o.PaymentStatus == Jahongir_diplomIshi.Models.PaymentStatus.Paid ? "bg-success-subtle text-success" : "bg-warning-subtle text-warning")">
+                                        @(o.PaymentStatus == Jahongir_diplomIshi.Models.PaymentStatus.Paid ? "✅ To'landi" : "⏳ To'lov kutilmoqda")
+                                    </span>
+                                    <span class="fw-bold text-success">@o.TotalAmount.ToString("N0") so'm</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

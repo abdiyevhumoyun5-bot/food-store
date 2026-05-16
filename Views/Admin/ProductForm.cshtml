@@ -1,0 +1,148 @@
+@model Jahongir_diplomIshi.ViewModels.ProductCreateViewModel
+@{
+    bool isEdit = ViewBag.EditId != null;
+    ViewData["Title"] = isEdit ? "Mahsulotni tahrirlash" : "Yangi mahsulot";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var seasons = new[] { ("Spring","🌸 Bahor"), ("Summer","☀️ Yoz"), ("Autumn","🍂 Kuz"), ("Winter","❄️ Qish") };
+    var units   = new[] { "kg","dona","litr","paket","gramm","ml" };
+}
+
+<div class="card border-0 shadow-sm" style="max-width:700px">
+    <div class="card-body p-4">
+        <h5 class="fw-bold mb-4">@ViewData["Title"]</h5>
+
+        <form asp-action="ProductForm" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            @if (isEdit) { <input type="hidden" name="id" value="@ViewBag.EditId" /> }
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+
+            <div class="row g-3">
+                <!-- Nomi -->
+                <div class="col-12">
+                    <label asp-for="Name" class="form-label small fw-semibold">Mahsulot nomi *</label>
+                    <input asp-for="Name" class="form-control rounded-pill" placeholder="Olma, Pomidor..." />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <!-- Kategoriya -->
+                <div class="col-md-6">
+                    <label asp-for="CategoryId" class="form-label small fw-semibold">Kategoriya *</label>
+                    <select asp-for="CategoryId" class="form-select rounded-pill">
+                        <option value="">— Tanlang —</option>
+                        @foreach (var c in Model.Categories)
+                        {
+                            if (Model.CategoryId == c.Id)
+                            { <option value="@c.Id" selected>@c.Name</option> }
+                            else
+                            { <option value="@c.Id">@c.Name</option> }
+                        }
+                    </select>
+                    <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                </div>
+
+                <!-- O'lchov birligi -->
+                <div class="col-md-6">
+                    <label asp-for="Unit" class="form-label small fw-semibold">O'lchov birligi</label>
+                    <select asp-for="Unit" class="form-select rounded-pill">
+                        @foreach (var u in units)
+                        {
+                            if (Model.Unit == u)
+                            { <option value="@u" selected>@u</option> }
+                            else
+                            { <option value="@u">@u</option> }
+                        }
+                    </select>
+                </div>
+
+                <!-- Narx -->
+                <div class="col-md-6">
+                    <label asp-for="Price" class="form-label small fw-semibold">Narx (so'm) *</label>
+                    <input asp-for="Price" type="number" class="form-control rounded-pill" placeholder="12000" min="1" />
+                    <span asp-validation-for="Price" class="text-danger small"></span>
+                </div>
+
+                <!-- Ombor -->
+                <div class="col-md-6">
+                    <label asp-for="Stock" class="form-label small fw-semibold">Ombor miqdori *</label>
+                    <input asp-for="Stock" type="number" class="form-control rounded-pill" placeholder="100" min="0" />
+                    <span asp-validation-for="Stock" class="text-danger small"></span>
+                </div>
+
+                <!-- Kaloriya -->
+                <div class="col-md-6">
+                    <label asp-for="CaloriesPer100g" class="form-label small fw-semibold">Kaloriya (100g) <span class="text-muted">ixtiyoriy</span></label>
+                    <input asp-for="CaloriesPer100g" type="number" class="form-control rounded-pill" placeholder="52" min="0" />
+                </div>
+
+                <!-- Tavsif -->
+                <div class="col-12">
+                    <label asp-for="Description" class="form-label small fw-semibold">Tavsif</label>
+                    <textarea asp-for="Description" class="form-control" rows="3" placeholder="Mahsulot haqida ma'lumot..."></textarea>
+                </div>
+
+                <!-- RASM — URL -->
+                <div class="col-12">
+                    <label asp-for="ImageUrl" class="form-label small fw-semibold">Rasm URL</label>
+                    <input asp-for="ImageUrl" class="form-control rounded-pill" placeholder="https://..." />
+                    <small class="text-muted">URL kiritilsa fayl yuklanmaydi</small>
+                </div>
+
+                <!-- RASM — Fayl -->
+                <div class="col-12">
+                    <label asp-for="ImageFile" class="form-label small fw-semibold">
+                        Yoki rasm yuklang <span class="text-muted">(JPG/PNG/WEBP, max 5 MB)</span>
+                    </label>
+                    <input asp-for="ImageFile" type="file" class="form-control rounded-pill" accept="image/*"
+                           onchange="previewImg(this)" />
+                    <img id="imgPreview" class="mt-2 rounded" style="max-height:120px;display:none" />
+                </div>
+
+                <!-- MAVSUMLAR -->
+                <div class="col-12">
+                    <label class="form-label small fw-semibold">Mavsumlar</label>
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var (val, label) in seasons)
+                        {
+                            bool sel = Model.SelectedSeasons.Contains(val);
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox"
+                                       name="SelectedSeasons" value="@val" id="s-@val"
+                                       @(sel ? "checked" : "") />
+                                <label class="form-check-label" for="s-@val">@label</label>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- TOP -->
+                <div class="col-12">
+                    <div class="form-check">
+                        <input asp-for="IsFeatured" class="form-check-input" />
+                        <label asp-for="IsFeatured" class="form-check-label">⭐ Bosh sahifada ko'rsatish (Top mahsulot)</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-success rounded-pill px-4">
+                    <i class="bi bi-check2 me-1"></i>@(isEdit ? "Yangilash" : "Qo'shish")
+                </button>
+                <a href="/admin/products" class="btn btn-outline-secondary rounded-pill px-4">Bekor</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function previewImg(input) {
+    const img = document.getElementById('imgPreview');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => { img.src = e.target.result; img.style.display = ''; };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+}

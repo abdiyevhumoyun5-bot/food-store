@@ -1,0 +1,130 @@
+@model List<Jahongir_diplomIshi.Models.Product>
+@{
+    ViewData["Title"] = "Bosh sahifa";
+    var seasonalProducts = ViewBag.SeasonalProducts as List<Jahongir_diplomIshi.Models.Product> ?? new();
+    var featuredProducts = ViewBag.FeaturedProducts as List<Jahongir_diplomIshi.Models.Product> ?? new();
+    var categories       = ViewBag.Categories as List<Jahongir_diplomIshi.Models.Category> ?? new();
+    int totalPages       = ViewBag.TotalPages ?? 1;
+    int currentPage      = ViewBag.CurrentPage ?? 1;
+    string search        = ViewBag.Search ?? "";
+    string currentCat    = ViewBag.CurrentCategory ?? "";
+}
+
+<!-- HERO -->
+<section class="hero-section bg-success text-white py-5">
+    <div class="container py-3">
+        <div class="row align-items-center">
+            <div class="col-md-7">
+                <span class="badge bg-warning text-dark mb-2 fs-6 px-3 py-2">
+                    @ViewBag.SeasonEmoji @ViewBag.SeasonName mahsulotlari
+                </span>
+                <h1 class="display-5 fw-bold mb-3">Yangi va sifatli<br/>oziq-ovqat mahsulotlari</h1>
+                <p class="lead mb-4 opacity-75">Kunlik mahsulotlarni qulay va tez buyurtma qiling. Yetkazib beramiz yoki olib ketishingiz mumkin.</p>
+                <div class="d-flex gap-3">
+                    <a href="#products" class="btn btn-warning btn-lg rounded-pill px-4 fw-semibold">
+                        <i class="bi bi-bag me-2"></i>Xarid qilish
+                    </a>
+                    <a href="/Cart" class="btn btn-outline-light btn-lg rounded-pill px-4">
+                        <i class="bi bi-cart3 me-2"></i>Savat
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-5 text-center d-none d-md-block">
+                <div style="font-size:7rem">🛒</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- MAVSUMIY MAHSULOTLAR -->
+@if (seasonalProducts.Any())
+{
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="h4 fw-bold mb-4">
+                @ViewBag.SeasonEmoji @ViewBag.SeasonName mahsulotlari
+                <span class="badge bg-success ms-2 fs-6">Tavsiya etiladi</span>
+            </h2>
+            <div class="row g-3">
+                @foreach (var p in seasonalProducts)
+                {
+                    <div class="col-6 col-md-4 col-lg-3">
+                        @await Html.PartialAsync("_ProductCard", p)
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<!-- KATEGORIYALAR -->
+<section class="py-4">
+    <div class="container">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <a href="/" class="btn @(string.IsNullOrEmpty(currentCat) ? "btn-success" : "btn-outline-success") btn-sm rounded-pill">
+                Barchasi
+            </a>
+            @foreach (var c in categories)
+            {
+                <a href="/?category=@c.Slug" class="btn @(currentCat == c.Slug ? "btn-success" : "btn-outline-secondary") btn-sm rounded-pill">
+                    @c.Name
+                </a>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- BARCHA MAHSULOTLAR -->
+<section id="products" class="pb-5">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h2 class="h4 fw-bold mb-0">
+                @if (!string.IsNullOrEmpty(search))
+                { <span>"@search" — qidiruv natijalari</span> }
+                else if (!string.IsNullOrEmpty(currentCat))
+                { <span>@(categories.FirstOrDefault(c => c.Slug == currentCat)?.Name ?? currentCat)</span> }
+                else
+                { <span>Barcha mahsulotlar</span> }
+            </h2>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <div style="font-size:4rem">🔍</div>
+                <p class="mt-2">Mahsulot topilmadi</p>
+                <a href="/" class="btn btn-outline-success rounded-pill">Barchani ko'rish</a>
+            </div>
+        }
+        else
+        {
+            <div class="row g-3">
+                @foreach (var p in Model)
+                {
+                    <div class="col-6 col-md-4 col-lg-3">
+                        @await Html.PartialAsync("_ProductCard", p)
+                    </div>
+                }
+            </div>
+
+            <!-- PAGINATION -->
+            @if (totalPages > 1)
+            {
+                <nav class="mt-4 d-flex justify-content-center">
+                    <ul class="pagination">
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            <li class="page-item @(i == currentPage ? "active" : "")">
+                                <a class="page-link" href="?page=@i&search=@search&category=@currentCat">@i</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        }
+    </div>
+</section>
+
+@section Scripts {
+<script src="~/js/cart.js"></script>
+}

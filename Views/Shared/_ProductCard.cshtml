@@ -1,0 +1,50 @@
+@model Jahongir_diplomIshi.Models.Product
+<div class="card h-100 border-0 shadow-sm product-card">
+    <div class="position-relative overflow-hidden" style="height:170px">
+        <img src="@Model.DisplayImage" alt="@Model.Name"
+             class="card-img-top w-100 h-100 object-fit-cover"
+             onerror="this.src='/img/no-image.png'" />
+        @if (Model.IsFeatured)
+        {
+            <span class="position-absolute top-0 start-0 badge bg-warning text-dark m-2">
+                <i class="bi bi-star-fill me-1"></i>Top
+            </span>
+        }
+        @if (Model.Stock < 5 && Model.Stock > 0)
+        {
+            <span class="position-absolute top-0 end-0 badge bg-danger m-2">Kam qoldi</span>
+        }
+        <button class="btn btn-success btn-sm position-absolute bottom-0 end-0 m-2 rounded-pill fav-btn"
+                onclick="toggleFavorite(@Model.Id, this)" data-id="@Model.Id"
+                title="Sevimlilarga qo'shish">
+            <i class="bi bi-heart"></i>
+        </button>
+    </div>
+    <div class="card-body p-3 d-flex flex-column">
+        <p class="text-muted small mb-1">@Model.Category?.Name</p>
+        <h6 class="card-title fw-semibold mb-1 text-truncate">@Model.Name</h6>
+        <div class="mt-auto">
+            <div class="d-flex align-items-center justify-content-between mt-2">
+                <span class="fw-bold text-success">@Model.Price.ToString("N0") so'm / @Model.Unit</span>
+            </div>
+            @if (Model.Stock == 0)
+            {
+                <button class="btn btn-secondary btn-sm w-100 mt-2 rounded-pill" disabled>
+                    Omborda yo'q
+                </button>
+            }
+            else
+            {
+                <div class="d-flex gap-1 mt-2">
+                    <button class="btn btn-success btn-sm flex-grow-1 rounded-pill"
+                            onclick="addToCart(@Model.Id)">
+                        <i class="bi bi-cart-plus me-1"></i>Savatga
+                    </button>
+                    <a href="/Home/Product/@Model.Id" class="btn btn-outline-secondary btn-sm rounded-pill">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

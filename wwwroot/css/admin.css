@@ -1,0 +1,33 @@
+/* =====================================================
+   Admin Panel CSS
+   ===================================================== */
+
+body { background: #f4f6f9; }
+
+/* SIDEBAR */
+.admin-sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+.admin-sidebar .nav-link {
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 2px;
+    transition: background 0.15s;
+}
+.admin-sidebar .nav-link:hover,
+.admin-sidebar .nav-link.active {
+    background: rgba(255,255,255,0.1);
+    color: white !important;
+}
+
+/* STAT CARDS */
+.card .bg-success.bg-opacity-10 { border-radius: 12px; }
+
+/* TABLE */
+.table > :not(caption) > * > * { vertical-align: middle; }
+
+/* BADGES */
+.badge { font-weight: 500; }

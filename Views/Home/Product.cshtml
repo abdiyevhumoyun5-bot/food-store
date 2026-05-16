@@ -1,0 +1,122 @@
+@model Jahongir_diplomIshi.Models.Product
+@{
+    ViewData["Title"] = Model.Name;
+    var related = ViewBag.Related as List<Jahongir_diplomIshi.Models.Product> ?? new();
+}
+
+<div class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/" class="text-success">Bosh sahifa</a></li>
+            <li class="breadcrumb-item"><a href="/?category=@Model.Category?.Slug" class="text-success">@Model.Category?.Name</a></li>
+            <li class="breadcrumb-item active">@Model.Name</li>
+        </ol>
+    </nav>
+
+    <div class="row g-5">
+        <div class="col-md-5">
+            <img src="@Model.DisplayImage" alt="@Model.Name"
+                 class="img-fluid rounded-3 shadow w-100 object-fit-cover"
+                 style="max-height:400px"
+                 onerror="this.src='/img/no-image.png'" />
+        </div>
+        <div class="col-md-7">
+            <span class="badge bg-success-subtle text-success mb-2">@Model.Category?.Name</span>
+            <h1 class="h2 fw-bold mb-3">@Model.Name</h1>
+            <div class="fs-3 fw-bold text-success mb-3">@Model.Price.ToString("N0") so'm / @Model.Unit</div>
+
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <p class="text-muted mb-4">@Model.Description</p>
+            }
+
+            <div class="d-flex flex-wrap gap-2 mb-4">
+                @if (Model.SeasonList.Any())
+                {
+                    foreach (var s in Model.SeasonList)
+                    {
+                        <span class="badge bg-info-subtle text-info">
+                            @(s.ToString() switch { "Spring" => "🌸 Bahor", "Summer" => "☀️ Yoz", "Autumn" => "🍂 Kuz", "Winter" => "❄️ Qish", _ => s.ToString() })
+                        </span>
+                    }
+                }
+                @if (Model.CaloriesPer100g.HasValue)
+                {
+                    <span class="badge bg-warning-subtle text-warning">🔥 @Model.CaloriesPer100g kkal/100g</span>
+                }
+            </div>
+
+            @if (Model.Stock == 0)
+            {
+                <div class="alert alert-warning">Hozirda omborda mavjud emas</div>
+            }
+            else
+            {
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="input-group" style="width:130px">
+                        <button class="btn btn-outline-secondary" onclick="changeQty(-1)">-</button>
+                        <input type="number" id="qty" class="form-control text-center" value="1" min="1" max="@Model.Stock" />
+                        <button class="btn btn-outline-secondary" onclick="changeQty(1)">+</button>
+                    </div>
+                    <small class="text-muted">Omborda: @Model.Stock @Model.Unit</small>
+                </div>
+                <div class="d-flex gap-3">
+                    <button class="btn btn-success btn-lg rounded-pill px-5" onclick="addToCartQty(@Model.Id)">
+                        <i class="bi bi-cart-plus me-2"></i>Savatga qo'shish
+                    </button>
+                    <button class="btn btn-outline-danger rounded-pill px-3 fav-btn" onclick="toggleFavorite(@Model.Id, this)">
+                        <i class="bi bi-heart"></i>
+                    </button>
+                </div>
+                <div id="addMsg" class="mt-3"></div>
+            }
+        </div>
+    </div>
+
+    <!-- O'XSHASH MAHSULOTLAR -->
+    @if (related.Any())
+    {
+        <div class="mt-5">
+            <h4 class="fw-bold mb-4">O'xshash mahsulotlar</h4>
+            <div class="row g-3">
+                @foreach (var p in related)
+                {
+                    <div class="col-6 col-md-3">
+                        @await Html.PartialAsync("_ProductCard", p)
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script src="~/js/cart.js"></script>
+<script>
+function changeQty(delta) {
+    const el = document.getElementById('qty');
+    let v = parseInt(el.value) + delta;
+    el.value = Math.max(1, Math.min(@Model.Stock, v));
+}
+function addToCartQty(id) {
+    const qty = parseInt(document.getElementById('qty').value);
+    fetch('/Cart/Add', {
+        method: 'POST',
+        headers: {'Content-Type':'application/x-www-form-urlencoded'},
+        body: `productId=${id}&quantity=${qty}&__RequestVerificationToken=${getToken()}`
+    }).then(r => r.json()).then(d => {
+        if (d.success) {
+            document.getElementById('addMsg').innerHTML =
+                '<div class="alert alert-success py-2">✅ Savatga qo\'shildi!</div>';
+            updateCartCount(d.count);
+            setTimeout(() => document.getElementById('addMsg').innerHTML = '', 3000);
+        }
+    });
+}
+function getToken() {
+    const el = document.querySelector('input[name="__RequestVerificationToken"]');
+    return el ? el.value : '';
+}
+</script>
+<form style="display:none">@Html.AntiForgeryToken()</form>
+}
