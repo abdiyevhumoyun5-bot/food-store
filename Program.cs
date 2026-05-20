@@ -21,9 +21,12 @@ if (connectionString != null &&
     (connectionString.StartsWith("postgresql://") || connectionString.StartsWith("postgres://")))
 {
     var uri = new Uri(connectionString);
-    var userInfo = uri.UserInfo.Split(':');
+    // Split(':',2) — parolda ':' bo'lsa ham to'g'ri ishlaydi
+    var userInfo = uri.UserInfo.Split(':', 2);
+    var username = Uri.UnescapeDataString(userInfo[0]);
+    var password = Uri.UnescapeDataString(userInfo.Length > 1 ? userInfo[1] : "");
     connectionString =
-        $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
+        $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
 }
 
 builder.Services.AddDbContext<AppDbContext>(options =>
