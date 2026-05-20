@@ -61,12 +61,12 @@
 <section class="py-4">
     <div class="container">
         <div class="d-flex flex-wrap gap-2 align-items-center">
-            <a href="/" class="btn @(string.IsNullOrEmpty(currentCat) ? "btn-success" : "btn-outline-success") btn-sm rounded-pill">
+            <a href="/#products" class="btn @(string.IsNullOrEmpty(currentCat) ? "btn-success" : "btn-outline-success") btn-sm rounded-pill">
                 Barchasi
             </a>
             @foreach (var c in categories)
             {
-                <a href="/?category=@c.Slug" class="btn @(currentCat == c.Slug ? "btn-success" : "btn-outline-secondary") btn-sm rounded-pill">
+                <a href="/?category=@c.Slug#products" class="btn @(currentCat == c.Slug ? "btn-success" : "btn-outline-secondary") btn-sm rounded-pill">
                     @c.Name
                 </a>
             }
