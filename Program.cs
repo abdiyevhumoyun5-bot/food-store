@@ -41,8 +41,10 @@ else
         var userInfo = uri.UserInfo.Split(':', 2);
         var username = Uri.UnescapeDataString(userInfo[0]);
         var password = Uri.UnescapeDataString(userInfo.Length > 1 ? userInfo[1] : "");
+        // Port=-1 bo'lsa (Render internal) — default 5432 ishlatamiz
+        var dbPort = uri.Port > 0 ? uri.Port : 5432;
         connectionString =
-            $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
+            $"Host={uri.Host};Port={dbPort};Database={uri.AbsolutePath.TrimStart('/')};Username={username};Password={password};SSL Mode=Prefer;Trust Server Certificate=true";
     }
     else
     {
