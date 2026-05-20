@@ -13,6 +13,7 @@ builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 // PostgreSQL — Railway DATABASE_URL yoki lokal connection string
 var connectionString =
     Environment.GetEnvironmentVariable("DATABASE_URL") ??
+    Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL") ??
     builder.Configuration.GetConnectionString("DefaultConnection");
 
 // Railway DATABASE_URL ni Npgsql formatiga o'girish
