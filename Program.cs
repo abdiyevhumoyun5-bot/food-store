@@ -10,24 +10,44 @@ var builder = WebApplication.CreateBuilder(args);
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5050";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
-// PostgreSQL — Railway DATABASE_URL yoki lokal connection string
-var connectionString =
-    Environment.GetEnvironmentVariable("DATABASE_URL") ??
-    Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL") ??
-    builder.Configuration.GetConnectionString("DefaultConnection");
+// PostgreSQL — Railway uchun connection string
+// 1-usul: individual PG* o'zgaruvchilar (eng ishonchli)
+var pgHost     = Environment.GetEnvironmentVariable("PGHOST");
+var pgPort     = Environment.GetEnvironmentVariable("PGPORT") ?? "5432";
+var pgDatabase = Environment.GetEnvironmentVariable("PGDATABASE");
+var pgUser     = Environment.GetEnvironmentVariable("PGUSER");
+var pgPassword = Environment.GetEnvironmentVariable("PGPASSWORD");
 
-// Railway DATABASE_URL ni Npgsql formatiga o'girish
-// postgresql:// yoki postgres:// ikkalasini ham qo'llab-quvvatlash
-if (connectionString != null &&
-    (connectionString.StartsWith("postgresql://") || connectionString.StartsWith("postgres://")))
+string? connectionString;
+
+if (pgHost != null && pgPassword != null)
 {
-    var uri = new Uri(connectionString);
-    // Split(':',2) — parolda ':' bo'lsa ham to'g'ri ishlaydi
-    var userInfo = uri.UserInfo.Split(':', 2);
-    var username = Uri.UnescapeDataString(userInfo[0]);
-    var password = Uri.UnescapeDataString(userInfo.Length > 1 ? userInfo[1] : "");
+    // Railway PG* variables dan to'g'ridan quramiz
     connectionString =
-        $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
+        $"Host={pgHost};Port={pgPort};Database={pgDatabase};Username={pgUser};Password={pgPassword};SSL Mode=Require;Trust Server Certificate=true";
+}
+else
+{
+    // Lokal yoki DATABASE_URL fallback
+    var rawUrl =
+        Environment.GetEnvironmentVariable("DATABASE_URL") ??
+        Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL") ??
+        builder.Configuration.GetConnectionString("DefaultConnection");
+
+    if (rawUrl != null &&
+        (rawUrl.StartsWith("postgresql://") || rawUrl.StartsWith("postgres://")))
+    {
+        var uri      = new Uri(rawUrl);
+        var userInfo = uri.UserInfo.Split(':', 2);
+        var username = Uri.UnescapeDataString(userInfo[0]);
+        var password = Uri.UnescapeDataString(userInfo.Length > 1 ? userInfo[1] : "");
+        connectionString =
+            $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
+    }
+    else
+    {
+        connectionString = rawUrl;
+    }
 }
 
 builder.Services.AddDbContext<AppDbContext>(options =>
